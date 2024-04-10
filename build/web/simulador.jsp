@@ -1,3 +1,6 @@
+<%@page import="java.util.Map"%>
+<%@page import="java.util.HashMap"%>
+<%@page import="br.edu.fesa.utils.EnumTipoSinal"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +15,10 @@
     <link rel="icon" type="image/x-icon" href="assets/icon.ico">
 </head>
 <body>
+    <%
+        HashMap<Integer, String> tiposSinais = EnumTipoSinal.getTiposSinais();
+    %>
+    
     <nav class="fixed-top pt-3 bg-light">
         <ul class="nav nav-tabs me-auto">
             <li class="nav-item ps-5">
@@ -26,21 +33,64 @@
         </ul>
     </nav>
     <main>
-        <h1>Simulador de canal de comunicação</h1>
-        <h2>Project-Based Learning</h2>
-        <p class="text-center mx-5 mt-3">O objetivo desse projeto é criar um <strong>Simulador de Canal de Comunicação</strong>, que, diante da entrada do usuário, exibirá como será o sinal de saída resultante</p>
-        <section id="home-graficos" class="my-5">
-            <div id="exemplo-entrada" class="grafico"></div>
-            <h1><i class="bi bi-arrow-right-square-fill"></i></h1>
-            <div id="exemplo-saida" class="grafico"></div>
+        <h1 class="pb-3">Simulador de canal de comunicação</h1>
+        
+        <!-- Formulário Simulação -->
+        <section class="accordion" id="accordionForm">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForm" aria-expanded="true" aria-controls="collapseForm">
+                        Dados Simulação
+                    </button>
+                </h2>
+                <div id="collapseForm" class="accordion-collapse collapse show" data-bs-parent="#accordionForm">
+                    <div class="accordion-body">
+                        <form id="formSimular" action="SimulacaoController" method="POST">
+                            <label for="frequencia" class="form-label mt-3">Frequência [kHz] <span class="text-danger">*</span></label>
+                            <input id="frequencia" name="frequencia" type="number" class="form-control my-2" required placeholder="Frequencia" min="1" max="100">
+
+                            <label for="tipoSinal" class="form-label mt-3">Tipo de Sinal <span class="text-danger">*</span></label>
+                            <select id="tipoSinal" name="tipoSinal" class="form-select my-2" aria-label="Tipo de Sinal" required>
+                                <option value="" disabled selected hidden>Selecione um tipo de sinal</option>
+                                <% for (Map.Entry<Integer, String> tipo : tiposSinais.entrySet()) { %>
+                                <option value="<%= tipo.getKey() %>"><%= tipo.getValue() %></option>
+                                <% } %>
+                            </select>
+
+                            <label for="frequenciaMin" class="form-label mt-3">Frequências de corte do canal [kHz] <span class="text-danger">*</span></label>
+                            <p id="rangeFrequenciaErro" class="text-danger"></p>
+                            <div class="d-flex">
+                                <input id="frequenciaMin" name="frequenciaMin" type="number" class="form-control m-2" required placeholder="Frequencia Mínima" min="0" max="100">
+                                <input id="frequenciaMax" name="frequenciaMax" type="number" class="form-control m-2" required placeholder="Frequencia Máxima" min="0" max="100">
+                            </div>
+                            
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-primary mt-4">Simular</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </section>
-        <a class="btn btn-primary fs-3" href="simulador.jsp">Simular</a>
+        <!-- Formulário Simulação -->
+        
+        <section id="graficos" class="mt-5">
+            <div id="sinal-entrada" class="grafico"></div>
+        </section>
+        
+           
     </main>
     <footer class="fixed-bottom py-3 border-top bg-light">
         <p class="text-muted ms-5">Projeto desenvolvido no 7° semestre do curso de Engenharia de Computação</p>
     </footer>
-    <script src="app.js"></script>
+    <script src="simulacao.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        <% String errorMessage = (String)request.getAttribute("errorMessage");
+               if (errorMessage != null && !errorMessage.isEmpty()) { %>
+                   alert("<%= errorMessage %>");
+        <% } %>
+    </script>
 </body>
 </html>
 
