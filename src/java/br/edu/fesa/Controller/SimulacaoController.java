@@ -1,9 +1,10 @@
 
 package br.edu.fesa.Controller;
 
-import br.edu.fesa.utils.Point;
+import br.edu.fesa.Models.Ponto;
+import br.edu.fesa.Models.Resultado;
+import br.edu.fesa.utils.EnumTipoSinal;
 import com.google.gson.Gson;
-import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,53 +18,69 @@ import java.util.List;
 @WebServlet(name = "SimulacaoController", urlPatterns = {"/SimulacaoController"})
 public class SimulacaoController extends HttpServlet {
     
-    private static final String jspFile = "simulador.jsp";
+    private final int qtdHarmonicas = 100;
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String frequenciaStr = request.getParameter("frequencia");
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        // Resultado do processo
+        Resultado resultado = new Resultado();
+         
         try {
-            String frequenciaStr = request.getParameter("frequencia");
-            String tipoSinalStr = request.getParameter("tipoSinal");
-            String frequenciaMinStr = request.getParameter("frequenciaMin");
-            String frequenciaMaxStr = request.getParameter("frequenciaMax");
             
-            Integer frequencia = Integer.valueOf(frequenciaStr);
-            List<Point> pontosDaOndaQuadrada = calcularPontosDaOndaQuadrada(frequencia);
+            // Dados gerais de entrada
+            Integer frequencia = Integer.valueOf(request.getParameter("frequencia"));
+            EnumTipoSinal tipoSinal = EnumTipoSinal.forInt(Integer.parseInt(request.getParameter("tipoSinal")));
+            //String frequenciaMinStr = request.getParameter("frequenciaMin");
+            //String frequenciaMaxStr = request.getParameter("frequenciaMax");
             
+            resultado.setEntrada(retornaSinalEntrada(tipoSinal, frequencia));
+            
+        } catch (Exception e) {
+            resultado.setErro(e.getMessage());
+            
+        } finally {
             Gson gson = new Gson();
-            String dadosDaOndaQuadradaJson = gson.toJson(pontosDaOndaQuadrada);
+            String retorno = gson.toJson(resultado);
             
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(dadosDaOndaQuadradaJson);
-        } catch (Exception e) {
-            String errorMessage = "Erro ao realizar a simulação: " + e.getMessage();
-            request.setAttribute("errorMessage", errorMessage);
-            RequestDispatcher dispatcher = request.getRequestDispatcher(jspFile);
-            dispatcher.forward(request, response);
+            response.getWriter().write(retorno);
         }
     }
     
-    private List<Point> calcularPontosDaOndaQuadrada(int frequencia) {
-        
-        List<Point> pontos = new ArrayList<>();
-        
-        for (double i = 0; i < frequencia * 2; i += frequencia / 100.0) {
+    private List<Ponto> retornaSinalEntrada(EnumTipoSinal tipoSinal, int frequencia) {
+        double periodo = 1.0 / frequencia;
+        List<Ponto> pontos = new ArrayList<>();
+        double tempo = periodo * 2;
+        double incremento = periodo / 100.0;
+
+        for (double i = 0; i <= tempo + incremento; i += incremento) {
+            double y;
+            double valorModificado = i % periodo;
             
-            double y =  (i % frequencia) < (frequencia / 2.0) ? 1 : -1;
-            
-            pontos.add(new Point(i, y));
+            switch (tipoSinal) {
+                case Quadrada -> y = (valorModificado < (periodo / 2.0)) ? 1 : -1;
+                case Triangular -> y = (valorModificado < (periodo / 2.0)) ?
+                            (valorModificado / (periodo / 2.0)) * 2.0 - 1.0 :
+                            ((periodo - valorModificado) / (periodo / 2.0)) * 2.0 - 1.0;
+                case DenteDeSerra -> y = valorModificado * 2 - 1;
+                case SenoidalRetificada -> y = Math.abs(Math.sin((i / periodo / 2) * 2 * Math.PI));
+                default -> throw new IllegalArgumentException("Tipo de sinal inválido: " + tipoSinal.getValue());
+            }
+            pontos.add(new Ponto(i, y));
         }
+
         return pontos;
     }
-    
+
+
     @Override
     public String getServletInfo() {
         return "Simulacao Controller";

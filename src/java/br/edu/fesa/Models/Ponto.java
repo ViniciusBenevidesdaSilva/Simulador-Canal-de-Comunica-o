@@ -1,11 +1,11 @@
 
-package br.edu.fesa.utils;
+package br.edu.fesa.Models;
 
-public class Point {
+public class Ponto {
     private double x;
     private double y;
     
-    public Point(double x, double y) {
+    public Ponto(double x, double y) {
         this.x = x;
         this.y = y;
     }

@@ -83,7 +83,7 @@
     <footer class="fixed-bottom py-3 border-top bg-light">
         <p class="text-muted ms-5">Projeto desenvolvido no 7° semestre do curso de Engenharia de Computação</p>
     </footer>
-    <script src="simulacao.js"></script>
+    <script src="scripts/simulacao.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         <% String errorMessage = (String)request.getAttribute("errorMessage");
