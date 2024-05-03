@@ -82,7 +82,10 @@
                 <div id="fase-frequencia-entrada" class="grafico"></div>
             </div>
             
-            
+            <div class="d-flex">
+                <div id="modulo-resposta-canal" class="grafico"></div>
+                <div id="fase-resposta-canal" class="grafico"></div>
+            </div>
         </section>
         
            

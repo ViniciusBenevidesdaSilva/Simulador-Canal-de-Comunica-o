@@ -38,13 +38,15 @@ public class SimulacaoController extends HttpServlet {
             // Dados gerais de entrada
             Integer frequencia = Integer.valueOf(request.getParameter("frequencia"));
             EnumTipoSinal tipoSinal = EnumTipoSinal.forInt(Integer.parseInt(request.getParameter("tipoSinal")));
-            //String frequenciaMinStr = request.getParameter("frequenciaMin");
-            //String frequenciaMaxStr = request.getParameter("frequenciaMax");
+            double frequenciaMin = Double.valueOf(request.getParameter("frequenciaMin"));
+            double frequenciaMax = Double.valueOf(request.getParameter("frequenciaMax"));
             
             resultado.setModuloFrequenciaEntrada(retornaModuloFrequenciaEntrada(tipoSinal, frequencia));
             resultado.setFaseFrequenciaEntrada(retornaFaseFrequenciaEntrada(tipoSinal, frequencia));
             resultado.setEntrada(retornaSinalEntrada(tipoSinal, frequencia, resultado));
             
+            resultado.setModuloRespostaCanal(retornaModuloRespostaCanal(frequenciaMin, frequenciaMax));
+            resultado.setFaseRespostaCanal(retornaFaseRespostaCanal(frequenciaMin, frequenciaMax));
 
         } catch (NumberFormatException e) {  
             resultado.setErro(e.getMessage());
@@ -62,6 +64,7 @@ public class SimulacaoController extends HttpServlet {
         }
     }
     
+    // ENTRADA
     private List<Ponto> retornaModuloFrequenciaEntrada(EnumTipoSinal tipoSinal, int frequencia) {
         
         List<Ponto> pontos = new ArrayList<>();
@@ -129,6 +132,61 @@ public class SimulacaoController extends HttpServlet {
         return pontos;
     }
 
+    // CANAL
+    private List<Ponto> retornaModuloRespostaCanal(double frequenciaMin, double frequenciaMax){
+        List<Ponto> retorno = new ArrayList<Ponto>();
+        double y;
+        
+        if(frequenciaMax == 0 || frequenciaMin > frequenciaMax){
+            throw new IllegalArgumentException("Frequência máxima inválida.");
+        }
+        
+        // Passa-baixas
+        if(frequenciaMin == 0){
+            for(int i = 0; i <= qtdHarmonicas; i++){
+                y = 1 / (Math.sqrt(1 + Math.pow((i / frequenciaMax), 2)));
+                retorno.add(new Ponto(i, y));
+            }
+            
+        // Passa-faixas
+        } else {
+            for(int i = 0; i <= qtdHarmonicas; i++){
+                y = i / (frequenciaMin * Math.sqrt(
+                    (1 + Math.pow((i / frequenciaMin), 2)) *
+                    (1 + Math.pow((i / frequenciaMax), 2))
+                ));                
+                retorno.add(new Ponto(i, y));
+            }
+        }
+        
+        return retorno;
+    }
+    
+    private List<Ponto> retornaFaseRespostaCanal(double frequenciaMin, double frequenciaMax){
+        List<Ponto> retorno = new ArrayList<Ponto>();
+        double y;
+        
+        if(frequenciaMax == 0 || frequenciaMin > frequenciaMax){
+            throw new IllegalArgumentException("Frequência máxima inválida.");
+        }
+        
+        // Passa-baixas
+        if(frequenciaMin == 0){
+            for(int i = 0; i <= qtdHarmonicas; i++){
+                y = Math.atan(- i / frequenciaMax);
+                retorno.add(new Ponto(i, y));
+            }
+            
+        // Passa-faixas
+        } else {
+            for(int i = 0; i <= qtdHarmonicas; i++){
+                y = - PI / 2 - Math.atan((i * (frequenciaMin + frequenciaMax))/((frequenciaMin * frequenciaMax) - i * i));
+                retorno.add(new Ponto(i, y));
+            }
+        }
+        
+        return retorno;
+    }
 
     @Override
     public String getServletInfo() {

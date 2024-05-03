@@ -1,5 +1,5 @@
 
-function atualizarGraficoLinha(dados, grafico, nome) {
+function atualizarGraficoLinha(dados, grafico, nome, xName, yName, cor) {
     var chart = Highcharts.chart(grafico, {
         chart: {
             type: 'line'
@@ -9,22 +9,23 @@ function atualizarGraficoLinha(dados, grafico, nome) {
         },
         xAxis: {
             title: {
-                text: 'Tempo'
+                text: xName
             }
         },
         yAxis: {
             title: {
-                text: 'Amplitude'
+                text: yName
             }
         },
         series: [{
             name: nome,
-            data: dados
+            data: dados,
+            color: cor
         }]
     });
 }
 
-function atualizarGraficoBarras(dados, grafico, nome){
+function atualizarGraficoBarras(dados, grafico, nome, xName, yName, cor){
      var chart = Highcharts.chart(grafico, {
         chart: {
             type: 'column'
@@ -34,17 +35,18 @@ function atualizarGraficoBarras(dados, grafico, nome){
         },
         xAxis: {
             title: {
-                text: 'Frequência'
+                text: xName
             }
         },
         yAxis: {
             title: {
-                text: 'Amplitude'
+                text: yName
             }
         },
         series: [{
             name: nome,
-            data: dados
+            data: dados,
+            color: cor
         }]
     });
 }
@@ -74,7 +76,9 @@ form.addEventListener('submit', function(event) {
     
     var frequencia = document.getElementById("frequencia").value;
     var tipoSinal = document.getElementById("tipoSinal").value;
-    
+    var frequenciaMin = document.getElementById("frequenciaMin").value;
+    var frequenciaMax = document.getElementById("frequenciaMax").value;
+
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "SimulacaoController", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -84,22 +88,31 @@ form.addEventListener('submit', function(event) {
                 var resultado = JSON.parse(xhr.responseText);
                 
                 if(resultado.erro){
-                    console.error("Erro ao obter os dados do sinal.");
+                    alert(`Erro ao obter os dados do sinal: ${resultado.erro}`);
+                    console.error(`Erro ao obter os dados do sinal: ${resultado.erro}`);
                 } else {
-                    atualizarGraficoLinha(resultado.entrada, 'sinal-entrada', 'Sinal de Entrada');
-                    atualizarGraficoBarras(resultado.moduloFrequenciaEntrada, 'modulo-frequencia-entrada', 'Módulo da Resposta em frequência Entrada');
-                    atualizarGraficoBarras(resultado.faseFrequenciaEntrada, 'fase-frequencia-entrada', 'Fase da Resposta em frequência Entrada');
+                    atualizarGraficoLinha(resultado.entrada, 'sinal-entrada', 'Sinal de Entrada', 'Tempo (ms)', 'Amplitude', '#00c8ff');
+                    atualizarGraficoBarras(resultado.moduloFrequenciaEntrada, 'modulo-frequencia-entrada', 'Módulo da Resposta em frequência Entrada', 'Frequência (kHz)', 'Amplitude', '#00c8ff');
+                    atualizarGraficoBarras(resultado.faseFrequenciaEntrada, 'fase-frequencia-entrada', 'Fase da Resposta em frequência Entrada', 'Frequência (kHz)', 'Fase (rad)', '#00c8ff');
+                    
+                    atualizarGraficoLinha(resultado.moduloRespostaCanal, 'modulo-resposta-canal', 'Modulo da resposta em Frequência', 'Frequência (kHz)', 'Amplitude', '#ff0055');
+                    atualizarGraficoLinha(resultado.faseRespostaCanal, 'fase-resposta-canal', 'Fase da resposta em Frequência', 'Frequência (kHz)', 'Fase (rad)', '#ff0055');
                     
                     document.getElementById("btn-collapse-form").click();
                 }
             } else {
-                console.error("Erro ao obter os dados do sinal.");
+                    alert(`Erro ao obter os dados do sinal: ${xhr.status}`);
+                    console.error(`Erro ao obter os dados do sinal: ${xhr.status}`);
             }
         }
     };
 
     // Adicionando o parâmetro tipoSinal na requisição
-    xhr.send("frequencia=" + encodeURIComponent(frequencia) + "&tipoSinal=" + encodeURIComponent(tipoSinal));
+    xhr.send(
+            "frequencia=" + encodeURIComponent(frequencia) + 
+            "&tipoSinal=" + encodeURIComponent(tipoSinal) + 
+            "&frequenciaMin=" + encodeURIComponent(frequenciaMin) + 
+            "&frequenciaMax=" + encodeURIComponent(frequenciaMax));
 });
 
 function realizaValidacoes(){

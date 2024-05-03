@@ -11,7 +11,10 @@ public class Resultado {
     private List<Ponto> entrada;
     private List<Ponto> moduloFrequenciaEntrada;
     private List<Ponto> faseFrequenciaEntrada;
-        
+    
+    private List<Ponto> moduloRespostaCanal;
+    private List<Ponto> faseRespostaCanal;
+
     public List<Ponto> getEntrada() {
         return entrada;
     }
@@ -32,6 +35,20 @@ public class Resultado {
     public void setFaseFrequenciaEntrada(List<Ponto> faseFrequenciaEntrada) {
         this.faseFrequenciaEntrada = faseFrequenciaEntrada;
     }    
+    
+    public List<Ponto> getModuloRespostaCanal() {
+        return moduloRespostaCanal;
+    }
+    public void setModuloRespostaCanal(List<Ponto> moduloRespostaCanal) {
+        this.moduloRespostaCanal = moduloRespostaCanal;
+    }
+
+    public List<Ponto> getFaseRespostaCanal() {
+        return faseRespostaCanal;
+    }
+    public void setFaseRespostaCanal(List<Ponto> faseRespostaCanal) {
+        this.faseRespostaCanal = faseRespostaCanal;
+    }
     
     public String getErro(){
         return erro;
