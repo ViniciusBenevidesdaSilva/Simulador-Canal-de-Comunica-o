@@ -39,7 +39,7 @@
         <section class="accordion" id="accordionForm">
             <div class="accordion-item">
                 <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForm" aria-expanded="true" aria-controls="collapseForm">
+                    <button id="btn-collapse-form" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForm" aria-expanded="true" aria-controls="collapseForm">
                         Dados Simulação
                     </button>
                 </h2>
@@ -74,8 +74,15 @@
         </section>
         <!-- Formulário Simulação -->
         
-        <section id="graficos" class="mt-5">
+        <section id="graficos" class="text-center mt-5">
             <div id="sinal-entrada" class="grafico"></div>
+            
+            <div class="d-flex">
+                <div id="modulo-frequencia-entrada" class="grafico"></div>
+                <div id="fase-frequencia-entrada" class="grafico"></div>
+            </div>
+            
+            
         </section>
         
            

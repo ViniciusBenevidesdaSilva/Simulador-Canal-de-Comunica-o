@@ -24,6 +24,30 @@ function atualizarGraficoLinha(dados, grafico, nome) {
     });
 }
 
+function atualizarGraficoBarras(dados, grafico, nome){
+     var chart = Highcharts.chart(grafico, {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: nome
+        },
+        xAxis: {
+            title: {
+                text: 'Frequência'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Amplitude'
+            }
+        },
+        series: [{
+            name: nome,
+            data: dados
+        }]
+    });
+}
 
 // Range
 const frequenciaMin = document.getElementById("frequenciaMin");
@@ -63,6 +87,10 @@ form.addEventListener('submit', function(event) {
                     console.error("Erro ao obter os dados do sinal.");
                 } else {
                     atualizarGraficoLinha(resultado.entrada, 'sinal-entrada', 'Sinal de Entrada');
+                    atualizarGraficoBarras(resultado.moduloFrequenciaEntrada, 'modulo-frequencia-entrada', 'Módulo da Resposta em frequência Entrada');
+                    atualizarGraficoBarras(resultado.faseFrequenciaEntrada, 'fase-frequencia-entrada', 'Fase da Resposta em frequência Entrada');
+                    
+                    document.getElementById("btn-collapse-form").click();
                 }
             } else {
                 console.error("Erro ao obter os dados do sinal.");
