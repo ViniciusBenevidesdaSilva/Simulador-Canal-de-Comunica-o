@@ -91,13 +91,19 @@ form.addEventListener('submit', function(event) {
                     alert(`Erro ao obter os dados do sinal: ${resultado.erro}`);
                     console.error(`Erro ao obter os dados do sinal: ${resultado.erro}`);
                 } else {
+                    let indiceFase =  180 / Math.PI;
+                    
                     atualizarGraficoLinha(resultado.entrada, 'sinal-entrada', 'Sinal de Entrada', 'Tempo (ms)', 'Amplitude', '#00c8ff');
                     atualizarGraficoBarras(resultado.moduloFrequenciaEntrada, 'modulo-frequencia-entrada', 'Módulo da Resposta em frequência Entrada', 'Frequência (kHz)', 'Amplitude', '#00c8ff');
-                    atualizarGraficoBarras(resultado.faseFrequenciaEntrada, 'fase-frequencia-entrada', 'Fase da Resposta em frequência Entrada', 'Frequência (kHz)', 'Fase (rad)', '#00c8ff');
+                    atualizarGraficoBarras(resultado.faseFrequenciaEntrada.map(obj => ({ x: obj.x, y: obj.y * indiceFase })), 'fase-frequencia-entrada', 'Fase da Resposta em frequência Entrada', 'Frequência (kHz)', 'Fase (graus)', '#00c8ff');
                     
                     atualizarGraficoLinha(resultado.moduloRespostaCanal, 'modulo-resposta-canal', 'Modulo da resposta em Frequência', 'Frequência (kHz)', 'Amplitude', '#ff0055');
-                    atualizarGraficoLinha(resultado.faseRespostaCanal, 'fase-resposta-canal', 'Fase da resposta em Frequência', 'Frequência (kHz)', 'Fase (rad)', '#ff0055');
+                    atualizarGraficoLinha(resultado.faseRespostaCanal.map(obj => ({ x: obj.x, y: obj.y * indiceFase })), 'fase-resposta-canal', 'Fase da resposta em Frequência', 'Frequência (kHz)', 'Fase (graus)', '#ff0055');
                     
+                    atualizarGraficoLinha(resultado.saida, 'sinal-saida', 'Sinal de Saída', 'Tempo (ms)', 'Amplitude', '#2be331');
+                    atualizarGraficoBarras(resultado.moduloFrequenciaSaida, 'modulo-frequencia-saida', 'Módulo da Resposta em frequência Saída', 'Frequência (kHz)', 'Amplitude', '#2be331');
+                    atualizarGraficoBarras(resultado.faseFrequenciaSaida.map(obj => ({ x: obj.x, y: obj.y * indiceFase })), 'fase-frequencia-saida', 'Fase da Resposta em frequência Saída', 'Frequência (kHz)', 'Fase (graus)', '#2be331');
+                                        
                     document.getElementById("btn-collapse-form").click();
                 }
             } else {

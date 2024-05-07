@@ -38,8 +38,8 @@ public class SimulacaoController extends HttpServlet {
             // Dados gerais de entrada
             Integer frequencia = Integer.valueOf(request.getParameter("frequencia"));
             EnumTipoSinal tipoSinal = EnumTipoSinal.forInt(Integer.parseInt(request.getParameter("tipoSinal")));
-            double frequenciaMin = Double.valueOf(request.getParameter("frequenciaMin"));
-            double frequenciaMax = Double.valueOf(request.getParameter("frequenciaMax"));
+            double frequenciaMin = Double.parseDouble(request.getParameter("frequenciaMin"));
+            double frequenciaMax = Double.parseDouble(request.getParameter("frequenciaMax"));
             
             resultado.setModuloFrequenciaEntrada(retornaModuloFrequenciaEntrada(tipoSinal, frequencia));
             resultado.setFaseFrequenciaEntrada(retornaFaseFrequenciaEntrada(tipoSinal, frequencia));
@@ -48,6 +48,10 @@ public class SimulacaoController extends HttpServlet {
             resultado.setModuloRespostaCanal(retornaModuloRespostaCanal(frequenciaMin, frequenciaMax));
             resultado.setFaseRespostaCanal(retornaFaseRespostaCanal(frequenciaMin, frequenciaMax));
 
+            resultado.setModuloFrequenciaSaida(retornaModuloFrequenciaSaida(resultado.getModuloFrequenciaEntrada(), resultado.getModuloRespostaCanal()));
+            resultado.setFaseFrequenciaSaida(retornaFaseFrequenciaSaida(resultado));
+            resultado.setSaida(retornaSinalSaida(tipoSinal, frequencia, resultado));
+            
         } catch (NumberFormatException e) {  
             resultado.setErro(e.getMessage());
             
@@ -68,7 +72,8 @@ public class SimulacaoController extends HttpServlet {
     private List<Ponto> retornaModuloFrequenciaEntrada(EnumTipoSinal tipoSinal, int frequencia) {
         
         List<Ponto> pontos = new ArrayList<>();
-
+        pontos.add(new Ponto(0,0));
+        
         for (double i = 1; i <= qtdHarmonicas ; i++) {
             double y = 0;
             
@@ -88,7 +93,8 @@ public class SimulacaoController extends HttpServlet {
     private List<Ponto> retornaFaseFrequenciaEntrada(EnumTipoSinal tipoSinal, int frequencia) {
         
         List<Ponto> pontos = new ArrayList<>();
-
+        pontos.add(new Ponto(0,0));
+        
         for (double i = 1; i <= qtdHarmonicas ; i++) {
             double y;
             
@@ -105,8 +111,7 @@ public class SimulacaoController extends HttpServlet {
         return pontos;
     }
     
-    private List<Ponto> retornaSinalEntrada(EnumTipoSinal tipoSinal, int frequencia, Resultado resultado)
-    {
+    private List<Ponto> retornaSinalEntrada(EnumTipoSinal tipoSinal, int frequencia, Resultado resultado) {
         double periodo = 1.0 / frequencia;
         double tempo = periodo * 2;  // Serão exibidos dois ciclos completos da onda
         double incremento = periodo / 100.0;  // Quantidade de pontos por periodo
@@ -134,7 +139,7 @@ public class SimulacaoController extends HttpServlet {
 
     // CANAL
     private List<Ponto> retornaModuloRespostaCanal(double frequenciaMin, double frequenciaMax){
-        List<Ponto> retorno = new ArrayList<Ponto>();
+        List<Ponto> retorno = new ArrayList<>();
         double y;
         
         if(frequenciaMax == 0 || frequenciaMin > frequenciaMax){
@@ -163,7 +168,7 @@ public class SimulacaoController extends HttpServlet {
     }
     
     private List<Ponto> retornaFaseRespostaCanal(double frequenciaMin, double frequenciaMax){
-        List<Ponto> retorno = new ArrayList<Ponto>();
+        List<Ponto> retorno = new ArrayList<>();
         double y;
         
         if(frequenciaMax == 0 || frequenciaMin > frequenciaMax){
@@ -188,6 +193,59 @@ public class SimulacaoController extends HttpServlet {
         return retorno;
     }
 
+    // SAÍDA
+    private List<Ponto> retornaModuloFrequenciaSaida(List<Ponto> moduloEntrada, List<Ponto> moduloCanal) {
+        List<Ponto> pontos = new ArrayList<>();
+
+        for (int i = 0; i <= qtdHarmonicas ; i++) {
+            pontos.add(new Ponto(i, moduloEntrada.get(i).getY() * moduloCanal.get(i).getY()));
+        }
+        return pontos;
+    }
+    
+    private List<Ponto> retornaFaseFrequenciaSaida(Resultado resultado) {
+        List<Ponto> pontos = new ArrayList<>();
+        List<Ponto> faseEntrada = resultado.getFaseFrequenciaEntrada();
+        List<Ponto> faseCanal = resultado.getFaseRespostaCanal();
+        List<Ponto> moduloEntradaAux = resultado.getModuloFrequenciaEntrada();
+
+        for (int i = 0; i <= qtdHarmonicas ; i++) {
+            if(moduloEntradaAux.get(i).getY() == 0){
+                pontos.add(new Ponto(i, 0));
+            } else {
+                pontos.add(new Ponto(i, faseEntrada.get(i).getY() + faseCanal.get(i).getY()));
+            }
+        }
+        return pontos;
+    }
+    
+    private List<Ponto> retornaSinalSaida(EnumTipoSinal tipoSinal, int frequencia, Resultado resultado){
+        double periodo = 1.0 / frequencia;
+        double tempo = periodo * 2;  // Serão exibidos dois ciclos completos da onda
+        double incremento = periodo / 100.0;  // Quantidade de pontos por periodo
+        
+        List<Ponto> pontos = new ArrayList<>();
+        List<Ponto> moduloFrequenciaCanal = resultado.getModuloRespostaCanal();
+        List<Ponto> moduloFrequenciaSaida = resultado.getModuloFrequenciaSaida();
+        List<Ponto> faseFrequenciaSaidaEntrada = resultado.getFaseFrequenciaSaida();
+        
+        for (double i = 0; i <= tempo ; i += incremento) {
+            double y = tipoSinal == EnumTipoSinal.SenoidalRetificada ?  moduloFrequenciaCanal.get(0).getY() * 2 / PI : 0;  // a0
+            
+            for(int j = 1; j < moduloFrequenciaSaida.size(); j++){       
+                
+                double harmonica = moduloFrequenciaSaida.get(j).getX();
+                double modulo = moduloFrequenciaSaida.get(j).getY();  // An
+                double fase = faseFrequenciaSaidaEntrada.get(j).getY();  // Fn
+                
+                y += modulo * Math.cos(2 * frequencia * Math.PI * harmonica * i + fase);
+            }
+            pontos.add(new Ponto(i, y));
+        }
+        
+        return pontos;
+    }
+    
     @Override
     public String getServletInfo() {
         return "Simulacao Controller";

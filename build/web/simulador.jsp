@@ -86,6 +86,14 @@
                 <div id="modulo-resposta-canal" class="grafico"></div>
                 <div id="fase-resposta-canal" class="grafico"></div>
             </div>
+            
+            <div class="d-flex">
+                <div id="modulo-frequencia-saida" class="grafico"></div>
+                <div id="fase-frequencia-saida" class="grafico"></div>
+            </div>
+            
+            <div id="sinal-saida" class="grafico"></div>
+
         </section>
         
            
